@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>GLEIF Validation</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<body>
+  <div class="container mt-5">
+    <h1>GLEIF Validation</h1>
+    <form>
+      <div class="form-group">
+        <label for="gleifNumber">GLEIF Number</label>
+        <input type="text" class="form-control" id="gleifNumber" required>
+      </div>
+      <div id="leiInfo" style="display: none;">
+        <div class="form-group">
+          <label for="leiStatus">LEI Status</label>
+          <input type="text" class="form-control" id="leiStatus" readonly>
+        </div>
+        <div class="form-group">
+          <label for="legalEntityName">Legal Entity Name</label>
+          <input type="text" class="form-control" id="legalEntityName" readonly>
+        </div>
+        <div class="form-group">
+          <label for="gleifStatus">GLEIF Status</label>
+          <input type="text" class="form-control" id="gleifStatus" readonly>
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
+
+
+-------------------------------------------------------------
+
+const gleifNumberInput = document.getElementById('gleifNumber');
+const leiInfoDiv = document.getElementById('leiInfo');
+const leiStatusInput = document.getElementById('leiStatus');
+const legalEntityNameInput = document.getElementById('legalEntityName');
+const gleifStatusInput = document.getElementById('gleifStatus');
+
+gleifNumberInput.addEventListener('input', function() {
+  if (gleifNumberInput.checkValidity()) {
+    // Show the LEI info
+    leiInfoDiv.style.display = 'block';
+
+    // Make an API call to fetch the LEI info for the given GLEIF number
+    fetch(`https://api.gleif.org/api/v1/lei-records/${gleifNumberInput.value}`)
+      .then(response => response.json())
+      .then(data => {
+        // Set the LEI info fields with the data returned from the API
+        leiStatusInput.value = data.entity.legalEntityStatus;
+        legalEntityNameInput.value = data.entity.legalName.fullName;
+        gleifStatusInput.value = data.entity.gleifEntity.status;
+      })
+      .catch(error => {
+        console.error(error);
+        alert('Error fetching LEI info. Please try again later.');
+      });
+  } else {
+    // Hide the LEI info
+    leiInfoDiv.style.display = 'none';
+  }
+});
